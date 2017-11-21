@@ -1,12 +1,14 @@
 package com.imperialsoupgmail.tesseractexample;
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -40,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
     private static int CAMERA_CODE1 = 1;
     private static int CAMERA_CODE2 = 2;
     private ImageView mImageViewShow;
+    private String m_sOCRresult = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,11 +74,29 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(intent, CAMERA_CODE1);
     }
     public void processOCR(){
-        String OCRresult = null;
-        mTess.setImage(image);
-        OCRresult = mTess.getUTF8Text();
-        TextView OCRTextView = (TextView) findViewById(R.id.OCRTextView);
-        OCRTextView.setText(OCRresult);
+        final ProgressDialog progress = ProgressDialog.show(this, "Loading", "Parsing result...", true);
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                m_sOCRresult = "NOT MATCH";
+
+                mTess.setImage(image);
+                m_sOCRresult = mTess.getUTF8Text();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        TextView OCRTextView = (TextView) findViewById(R.id.OCRTextView);
+                        OCRTextView.setText(m_sOCRresult);
+                        progress.dismiss();
+
+                    }
+                });
+
+            }
+
+        });
+
+
     }
 
     private void checkPermission() {
@@ -114,6 +135,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
+
+
             if (requestCode == CAMERA_CODE1) {
                 /**
                  * 通过暂存路径取得图片
@@ -136,7 +159,9 @@ public class MainActivity extends AppCompatActivity {
                 }
                 image = bitmap;
                 mImageViewShow.setImageBitmap(bitmap);
+
                 processOCR();
+
             } else if (requestCode == CAMERA_CODE2) {
                 /**
                  * 通过data取得图片
@@ -145,6 +170,7 @@ public class MainActivity extends AppCompatActivity {
                 Bitmap bitmap = (Bitmap) extras.get("data");
                 mImageViewShow.setImageBitmap(bitmap);
             }
+
         }
     }
 

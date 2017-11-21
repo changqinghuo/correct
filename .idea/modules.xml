@@ -2,10 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/SimpleTesseractExample-master.iml" filepath="$PROJECT_DIR$/SimpleTesseractExample-master.iml" />
-      <module fileurl="file://$PROJECT_DIR$/TesseractExample.iml" filepath="$PROJECT_DIR$/TesseractExample.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/correct.iml" filepath="$PROJECT_DIR$/correct.iml" />
     </modules>
   </component>
 </project>
