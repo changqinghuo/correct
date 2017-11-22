@@ -7,12 +7,20 @@ import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
+import android.graphics.Paint;
+import android.graphics.Rect;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -65,12 +73,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void processImage(View view){
-        processOCR();
-        /*checkPermission();
+        //processOCR();
+        checkPermission();
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         Uri photoUri = Uri.fromFile(new File(mFilePath));
         intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
-        startActivityForResult(intent, CAMERA_CODE1);*/
+        startActivityForResult(intent, CAMERA_CODE1);
 
     }
     public void processOCR(){
@@ -131,6 +139,24 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private Bitmap convertToGrayscale(Bitmap bitmap) {
+        ColorMatrix colorMatrix = new ColorMatrix();
+        colorMatrix.setSaturation(0);
+        Paint paint = new Paint();
+        ColorMatrixColorFilter cmcf = new ColorMatrixColorFilter(colorMatrix);
+        paint.setColorFilter(cmcf);
+
+        Bitmap result = Bitmap.createBitmap(bitmap.getWidth(), bitmap
+                .getHeight(), Bitmap.Config.RGB_565);
+
+        Canvas drawingCanvas = new Canvas(result);
+        Rect src = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
+        Rect dst = new Rect(src);
+        drawingCanvas.drawBitmap(bitmap, src, dst, paint);
+
+        return result;
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -157,10 +183,20 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 }
-                image = bitmap;
-                mImageViewShow.setImageBitmap(bitmap);
 
-                processOCR();
+                int w = bitmap.getWidth();
+                int h = bitmap.getHeight();
+                Log.e("client_img", w+":"+h);
+                //灰度化
+                bitmap = convertToGrayscale(bitmap);
+                bitmap = Bitmap.createBitmap(bitmap, 130, 70, w-260, h-140);
+
+                // 必须加此行，tess-two要求BMP必须为此配置
+                //copy改为图的大小产生一个新位图，图像的大小为256位图。true表示产生的图片可以切割。
+                bitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
+                mImageViewShow.setImageBitmap(bitmap);
+             //   image = bitmap;
+               // processOCR();
 
             } else if (requestCode == CAMERA_CODE2) {
                 /**
