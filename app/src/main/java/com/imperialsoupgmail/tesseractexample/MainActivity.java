@@ -7,11 +7,9 @@ import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
-import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -53,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
         image = BitmapFactory.decodeResource(getResources(), R.drawable.test_image);
 
         //initialize Tesseract API
-        String language = "eng";
+        String language = "eng+num";
         datapath = getFilesDir()+ "/tesseract/";
         mTess = new TessBaseAPI();
 
@@ -67,11 +65,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void processImage(View view){
-        checkPermission();
+        processOCR();
+        /*checkPermission();
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         Uri photoUri = Uri.fromFile(new File(mFilePath));
         intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
-        startActivityForResult(intent, CAMERA_CODE1);
+        startActivityForResult(intent, CAMERA_CODE1);*/
+
     }
     public void processOCR(){
         final ProgressDialog progress = ProgressDialog.show(this, "Loading", "Parsing result...", true);
@@ -176,27 +176,56 @@ public class MainActivity extends AppCompatActivity {
 
     private void copyFiles() {
         try {
-            String filepath = datapath + "/tessdata/eng.traineddata";
-            AssetManager assetManager = getAssets();
+                {
+                    String filepath = datapath + "/tessdata/eng.traineddata";
+                    AssetManager assetManager = getAssets();
 
-            InputStream instream = assetManager.open("tessdata/eng.traineddata");
-            OutputStream outstream = new FileOutputStream(filepath);
+                    InputStream instream = assetManager.open("tessdata/eng.traineddata");
+                    OutputStream outstream = new FileOutputStream(filepath);
 
-            byte[] buffer = new byte[1024];
-            int read;
-            while ((read = instream.read(buffer)) != -1) {
-                outstream.write(buffer, 0, read);
-            }
+                    byte[] buffer = new byte[1024];
+                    int read;
+                    while ((read = instream.read(buffer)) != -1) {
+                        outstream.write(buffer, 0, read);
+                    }
 
 
-            outstream.flush();
-            outstream.close();
-            instream.close();
+                    outstream.flush();
+                    outstream.close();
+                    instream.close();
 
-            File file = new File(filepath);
-            if (!file.exists()) {
-                throw new FileNotFoundException();
-            }
+                    File file = new File(filepath);
+                    if (!file.exists()) {
+                        throw new FileNotFoundException();
+                    }
+
+                }
+                {
+                    String filepath = datapath + "/tessdata/num.traineddata";
+                    AssetManager assetManager = getAssets();
+
+                    InputStream instream = assetManager.open("tessdata/num.traineddata");
+                    OutputStream outstream = new FileOutputStream(filepath);
+
+                    byte[] buffer = new byte[1024];
+                    int read;
+                    while ((read = instream.read(buffer)) != -1) {
+                        outstream.write(buffer, 0, read);
+                    }
+
+
+                    outstream.flush();
+                    outstream.close();
+                    instream.close();
+
+                    File file = new File(filepath);
+                    if (!file.exists()) {
+                        throw new FileNotFoundException();
+                    }
+
+
+                }
+
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
